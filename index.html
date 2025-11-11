@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gloria主任的文字雲Slogan產生器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #FEFDF2; /* 柔和的米色/琥珀色背景 */
+            background-image: radial-gradient(circle at top right, rgba(251, 191, 36, 0.1), transparent),
+                              radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.1), transparent);
+            background-attachment: fixed;
+        }
+
+        .text-gradient-title {
+            background: linear-gradient(to right, #4F46E5, #06B6D4); /* 靛藍 到 藍綠色 */
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #resultsSection, #resultsSection * {
+                visibility: visible;
+            }
+            #resultsSection {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 1rem;
+                box-shadow: none;
+                border: none;
+            }
+            #slogansOutput {
+                height: auto;
+                max-height: 100%;
+                overflow: visible;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Amber) with Indigo/Teal Accents -->
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-3xl mx-auto">
+        <header class="text-center mb-6">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gradient-title mb-3">
+                Gloria主任的文字雲Slogan產生器
+            </h1>
+            <p class="text-sm sm:text-base font-bold text-indigo-700">
+                Gloria吳秀蘭主任＠國立曾文農工圖書館, Google Champion認證講師, Gemini AI認證講師，英文及台語雙專長教師，技術型高中英文學科中心進階種子教師
+            </p>
+        </header>
+
+        <main class="bg-white/80 backdrop-blur-lg p-6 sm:p-8 rounded-2xl shadow-xl w-full">
+            <div class="space-y-6">
+                <div>
+                    <label for="themeInput" class="block text-xl font-bold text-gray-800 mb-2">1. 輸入您的演講主題：</label>
+                    <input type="text" id="themeInput" class="w-full p-4 border border-gray-300 rounded-lg shadow-inner text-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="例如：AI 賦能教學、自主學習...">
+                </div>
+
+                <button id="generateButton" class="w-full bg-gradient-to-r from-indigo-600 to-teal-500 text-white font-bold text-xl py-4 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2">
+                    <svg id="loadingSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span id="buttonText">🚀 立即生成 Slogan</span>
+                </button>
+                <div id="errorDisplay" class="text-red-600 text-center font-semibold hidden"></div>
+            </div>
+        </main>
+
+        <section id="resultsSection" class="mt-8 bg-white/80 backdrop-blur-lg p-6 sm:p-8 rounded-2xl shadow-xl w-full hidden">
+            <label for="slogansOutput" class="block text-lg font-bold text-gray-700">AI 生成結果 (可編輯)：</label>
+            <textarea id="slogansOutput" rows="12" class="w-full p-4 border border-gray-300 rounded-lg shadow-inner text-base bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 no-print">
+                <button id="copyButton" class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold text-lg py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+                    📋 複製 Slogan
+                </button>
+                <button id="saveButton" class="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold text-lg py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+                    💾 儲存 txt
+                </button>
+                <button id="printButton" class="bg-gradient-to-r from-gray-700 to-gray-800 text-white font-bold text-lg py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+                    🖨️ 列印 PDF
+                </button>
+            </div>
+        </section>
+
+        <div id="wordCloudSection" class="mt-8 space-y-4 no-print hidden">
+            <h3 class="text-xl font-bold text-gray-700 text-center">下一步：</h3>
+            <a href="https://cloud.odportal.tw/home?text=" target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-xl py-4 px-6 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300">
+                🎨 試試文字雲
+            </a>
+            <p class="text-center text-gray-600">點擊上方按鈕，在新視窗貼上(Ctrl+V)您剛複製的Slogan！</p>
+        </div>
+
+    </div>
+
+    <script>
+        const themeInput = document.getElementById('themeInput');
+        const generateButton = document.getElementById('generateButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const buttonText = document.getElementById('buttonText');
+        const errorDisplay = document.getElementById('errorDisplay');
+        const resultsSection = document.getElementById('resultsSection');
+        const slogansOutput = document.getElementById('slogansOutput');
+        const saveButton = document.getElementById('saveButton');
+        const copyButton = document.getElementById('copyButton');
+        const printButton = document.getElementById('printButton');
+        const wordCloudSection = document.getElementById('wordCloudSection');
+
+        function showError(message) {
+            errorDisplay.textContent = message;
+            errorDisplay.classList.remove('hidden');
+        }
+
+        generateButton.addEventListener('click', async () => {
+            const theme = themeInput.value.trim();
+            if (!theme) {
+                showError('請至少輸入一個演講主題關鍵字！');
+                return;
+            }
+            
+            setLoading(true);
+            
+            try {
+                const generatedSlogans = await callGeminiAPI(theme);
+                slogansOutput.value = generatedSlogans;
+                resultsSection.classList.remove('hidden');
+                wordCloudSection.classList.remove('hidden'); 
+                showError('');
+            } catch (error) {
+                console.error('生成失敗:', error);
+                showError(`生成失敗，請稍後再試。(${error.message})`);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        async function callGeminiAPI(theme) {
+            // 修正：您在本機或預覽環境執行時，'fetch' 不知道 /api/generateSlogans 在哪裡。
+            // 我們必須使用 Vercel 部署的「絕對路徑」。
+            // const apiUrl = "/api/generateSlogans"; // 舊的相對路徑
+            const apiUrl = "https://slogan-generator-nine.vercel.app/api/generateSlogans";
+
+            const payload = {
+                theme: theme
+            };
+            
+            let response;
+            try {
+                response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch (networkError) {
+                console.error('Network error:', networkError);
+                throw new Error('網路連線錯誤，無法連線至後端服務。');
+            }
+
+
+            if (!response.ok) {
+                let errorData;
+                try {
+                     errorData = await response.json();
+                } catch (jsonError) {
+                    throw new Error(`伺服器回應錯誤 (狀態 ${response.status})，且回應非 JSON 格式。`);
+                }
+                throw new Error(errorData.error || `伺服器錯誤: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (!result.slogans) {
+                throw new Error('後端回應成功，但未包含 slogans 資料。');
+            }
+            return result.slogans;
+        }
+
+        saveButton.addEventListener('click', () => {
+            const text = slogansOutput.value;
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const themeValue = themeInput.value.trim();
+            a.download = `${themeValue || '未命名主題'}_slogan.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        copyButton.addEventListener('click', () => {
+            if (!navigator.clipboard) {
+                try {
+                    slogansOutput.select();
+                    document.execCommand('copy');
+                    copyButton.textContent = '✅ 已複製！';
+                    setTimeout(() => { copyButton.innerHTML = '📋 複製 Slogan'; }, 2000);
+                } catch (err) {
+                    console.error('備用複製失敗:', err);
+                    showError('複製失敗！請手動複製。');
+                }
+                return;
+            }
+
+            navigator.clipboard.writeText(slogansOutput.value).then(() => {
+                copyButton.textContent = '✅ 已複製！';
+                setTimeout(() => { copyButton.innerHTML = '📋 複製 Slogan'; }, 2000);
+            }, (err) => {
+                console.error('非同步複製失敗: ', err);
+                showError('複製失敗！您的瀏覽器可能不支援。');
+            });
+        });
+
+        printButton.addEventListener('click', () => {
+            window.print();
+        });
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                generateButton.disabled = true;
+                loadingSpinner.classList.remove('hidden');
+                buttonText.textContent = 'AI 思考中...';
+                errorDisplay.classList.add('hidden');
+                wordCloudSection.classList.add('hidden');
+            } else {
+                generateButton.disabled = false;
+                loadingSpinner.classList.add('hidden');
+                buttonText.textContent = '🚀 立即生成 Slogan';
+            }
+        }
+    </script>
+</body>
+</html>
+```
