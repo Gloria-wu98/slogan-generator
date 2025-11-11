@@ -38,6 +38,8 @@ module.exports = async (request, response) => {
             return response.status(500).json({ error: '伺服器金鑰設定錯誤' });
         }
         
+        // *** 關鍵修正 2！***
+        // 修正錯字： generativelace -> generativelanguage
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
         // 3. 在後端建立完整的提示 (System Prompt)
@@ -45,60 +47,4 @@ module.exports = async (request, response) => {
         
         const userPrompt = `
         請為我的演講產生 50 組文字雲 Slogan。
-        演講主題是: "${theme}"
-
-        Slogan 必須包含以下關鍵字 (請自然地融入)：
-        - Gloria
-        - Google認證講師
-        - Gemini
-        - NanoBanana
-        - NotebookLM
-        - Google AI Studio
-        - AI神助理
-        - G 決定權在人
-
-        請直接回傳 50 組 Slogan，每組一行，不要有編號。
-        `;
-        
-        const payload = {
-            contents: [{ parts: [{ text: userPrompt }] }],
-            systemInstruction: {
-                parts: [{ text: systemPrompt }]
-            },
-            generationConfig: {
-                maxOutputTokens: 8192,
-            }
-        };
-
-        // 4. 代表前端去呼叫 Google AI
-        const geminiResponse = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        // 5. 處理 Google AI 的錯誤
-        if (!geminiResponse.ok) {
-            const errorText = await geminiResponse.text();
-            console.error('Google AI API 錯誤:', errorText);
-            return response.status(geminiResponse.status).json({ error: `Google AI API 錯誤` });
-        }
-
-        const result = await geminiResponse.json();
-
-        // 6. 解析回應並只回傳 Slogan
-        let slogans = "無法解析 AI 回應。";
-        if (result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts[0]) {
-             slogans = result.candidates[0].content.parts[0].text;
-        } else {
-            console.error('未預期的 Google AI 回應結構:', JSON.stringify(result));
-        }
-
-        // 7. 將乾淨的 Slogan 傳回給前端
-        response.status(200).json({ slogans: slogans.trim() });
-
-    } catch (error) {
-        console.error('伺服器內部錯誤:', error.message);
-        response.status(500).json({ error: `伺服器內部錯誤: ${error.message}` });
-    }
-};
+        演講主題是: "${
